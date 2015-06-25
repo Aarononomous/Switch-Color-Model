@@ -25,19 +25,19 @@ def switch(s):
     r = int(colors[0])
     g = int(colors[1])
     b = int(colors[2])
-    return toRGBA(r,g,b)
+    if r <= 255 and g <= 255 and b <= 255:
+      return toRGBA(r,g,b)
   elif rgba.match(s):
     colors = list(rgba.findall(s)[0])
     r = int(colors[0])
     g = int(colors[1])
     b = int(colors[2])
-    return to3Hex(r,g,b)
-  else: return s
+    if r <= 255 and g <= 255 and b <= 255:
+      return to3Hex(r,g,b)
+  return s
 
 def toHex(n):
-  hex  = list('0123456789abcdef')
-  if n < 16: return hex[n]
-  else: return toHex(n//16) + hex[n % 16]
+  return "{0:0{1}x}".format(n,2)
 
 def to3Hex(r,g,b):
   if r%17 == 0 and g&17 == 0 and b%17 == 0:
