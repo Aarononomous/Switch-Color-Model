@@ -1,7 +1,7 @@
 [
 {
   "id" : "switch_color_model",
-  "caption" : "Switch CSS color model",
+  "caption" : "Switch CSS Color Model",
   "command" : "switch_color_model"
 }
 ]

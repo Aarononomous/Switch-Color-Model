@@ -1,28 +1,52 @@
 # Switch CSS Color Model
 
-A plugin for Sublime Text.
+A plugin for Sublime Text. Rapidly and correctly switch between CSS color models (hex, rgb(), and hsl()).
+
+N.b.: this doesn't work with rgba() and hsla() values with an alpha level that isn't 1.
 
 ## Usage
 
-Context menu.
+### Via the Context Menu
 
-Command palette
+Right-click on the selection you want to switch and choose "Switch CSS Color Model."
 
-Keyboad shortcut.
+### Via the Command Palette
 
-## Installation
+Within the command palette, "Switch CSS Color Model."
 
-TODO
+### With a Keyboard Shortcut
 
-## Keyboard Shortcut
+You can set up a keyboard shortcut to run the command by going to **Sublime Text > Preferences > Key Bindings &ndash; User** and adding your shortcut with the `switch_color_model` command. Here are my recommendations, but you should check the User and Default key bindings to make sure that you don't overwrite another shortcut.
 
-You can set up a keyboard shortcut to run the command by going to **Sublime Text > Preferences > Key Bindings &ndash; User** and adding your shortcut with the `switch_color_model` command.
+Mac
 
 ```
 [
-  { "keys" : ["alt+shift+c"], "command": "switch_color_model" }
+  { "keys" : ["ctrl+shift+c"], "command": "switch_color_model" }
 ]
 ```
+
+Windows/Linux
+
+```
+[
+  { "keys" : ["ctrl+alt+shift+c"], "command": "switch_color_model" }
+]
+```
+
+### Modifying Settings
+
+TODO: modification instructions
+
+## Installation
+
+### Manually
+
+Browse to ~/Library/Application Support/Sublime Text 3/Packages and unzip the download inside.
+
+## Bugs
+
+Please let me know!
 
 ## License
 
