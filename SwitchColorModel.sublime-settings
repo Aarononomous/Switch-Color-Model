@@ -1,25 +1,12 @@
 {
-  // Use HSL and HSLA Models, e.g. hsla(98,76%,54%,0.32)
-  "use_hsl" : true,
-  // Use RGB percent notation, e.g. rgb(12%,34%,56%)
-  "use_rgb_percent" : true,
   // Output hex values in upper- or lowercase, e.g. #4A8C27 vs. #4a8c27
   // set to false for uppercase
-  "lowercase_hex" : true,
-  // Switch to rgba if value is not already semi-transparent,
-  // e.g. rgba(xx,xx,xx,1)
-  "always_use_alpha" : true,
-  // Set order of swaps
-  // If you modify this, make sure to have a full cycle
-  // Any color models not used (disallowed above) or not reachable will be skipped
-  "swaps" : {
-    "hex_3_to" : "hex_6",
-    "hex_6_to" : "rgb",
-    "rgb_to" : "rgba",
-    "rgba_to": "rgb_pct",
-    "rgb_pct_to": "rgba_pct",
-    "rgba_pct_to": "hsl",
-    "hsl_to": "hsla",
-    "hsla_to": "hex_3"
-  }
+  "lowercase_hex" : false,
+  // Switch to rgba, etc. if color is not transparent, otherwise skip
+  // those.
+  "use_alpha" : true,
+  // Recognize HSL and HSLA Models, e.g. hsla(98,76%,54%,0.32)
+  "recognize_hsl" : true,
+  // Recognize RGB percent notation, e.g. rgb(12%,34%,56%)
+  "recognize_rgb_percent" : true
 }

@@ -6,270 +6,263 @@ import re
 
 SETTINGS_FILE = 'SwitchColorModel.sublime-settings'
 
-# regexes for values
-h3 = r'\B#([a-f\d])([a-f\d])([a-f\d])\b'
-h6 = r'\B#([a-f\d])([a-f\d])([a-f\d])([a-f\d])([a-f\d])([a-f\d])\b'
-rgbInt = r'\brgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)\B'
-rgbaInt = r'\brgba\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3}),\s*([\d.]+)\)\B'
-rgbPct = r'\brgb\(([\d.]+)%,\s*([\d.]+)%,\s*([\d.]+)%\)\B'
-rgbaPct = r'\brgba\(([\d.]+)%,\s*([\d.]+)%,\s*([\d.]+)%,\s*([\d.]+)\)\B'
-hslRE = r'\bhsl\(([\d.]+),\s*([\d.]+)%,\s*([\d.]+)%\)\B$'
-hslaRE = r'\bhsla\(([\d.]+),\s*([\d.]+)%,\s*([\d.]+)%,\s*([\d.]+)\)\B$'
 
-hex3 = re.compile(h3, re.IGNORECASE)
-hex6 = re.compile(h6, re.IGNORECASE)
-rgb  = re.compile(rgbInt)
-rgba = re.compile(rgbaInt)
-rgbP  = re.compile(rgbPct)
-rgbaP = re.compile(rgbaPct)
-hsl  = re.compile(hslRE)
-hsla = re.compile(hslaRE)
-regexes = re.compile(h3+'|'+h6+'|'+rgbInt+'|'+rgbaInt+'|'+rgbPct+'|'+rgbaPct+'|'+hslRE+'|'+hslaRE)
+class F:
 
-def switch(match):
-    s = match.group()
-    if hex3.match(s):
-        print('hex3')
-        return switchHex3(s)
-    elif hex6.match(s):
-        print('hex6')
-        return switchHex6(s)
-    elif rgb.match(s):
-        print('rgb')
-        return switchRGBInt(s)
-    elif rgba.match(s):
-        print('rgba')
-        return switchRGBAInt(s)
-    elif rgbP.match(s):
-        print('rgbP')
-        return switchRGBPct(s)
-    elif rgbaP.match(s):
-        print('rgbaP')
-        return switchRGBAPct(s)
-    elif hsl.match(s):
-        print('hsl')
-        return switchHSL(s)
-    elif hsla.match(s):
-        print('hsla')
-        return switchHSLA(s)
-    else:
-        return s
+    """Formats rgba values into output string"""
 
-def switchHex3(s):
-    colors = list(hex3.findall(s)[0])
-    r = int(colors[0], 16) * 17
-    g = int(colors[1], 16) * 17
-    b = int(colors[2], 16) * 17
-    return to6Hex(r,g,b)
+    # default for hex values is lowercase --
+    # change in SwitchColorModel.sublime-settings
+    lower = False
 
-def switchHex6(s):
-    colors = list(hex6.findall(s)[0])
-    r = int(colors[0] + colors[1], 16)
-    g = int(colors[2] + colors[3], 16)
-    b = int(colors[4] + colors[5], 16)
-    return toRGBInt(r,g,b)
+    # helper methods
+    def to_h(i):
+        # one-digit hex number
+        return list('0123456789abcdef')[i]
 
-def switchRGBInt(s):
-    colors = list(rgb.findall(s)[0])
-    r = int(colors[0])
-    g = int(colors[1])
-    b = int(colors[2])
-    if r <= 255 and g <= 255 and b <= 255:
-        return toRGBAInt(r,g,b,1.0)
-    else:
-        return s
+    def to_h_2(i):
+        # two-digit hex number with padding
+        return '{0:0{1}x}'.format(i, 2)
 
-def switchRGBAInt(s):
-    colors = list(rgba.findall(s)[0])
-    r = int(colors[0])
-    g = int(colors[1])
-    b = int(colors[2])
-    a = float(colors[3])
-    if a < 1.0:
-        return toRGBAPct(r,g,b,a)
-    if r <= 255 and g <= 255 and b <= 255:
-        return toRGBPct(r,g,b)
-    else:
-        return s
+    def to_pct(f):
+        # Max four digits after decimal point, but as few as possible
+        return '{:.4f}'.format(f).rstrip('0').rstrip('.')
 
-def switchRGBPct(s):
-    colors = list(rgbP.findall(s)[0])
-    r = float(colors[0]) * 255 / 100
-    g = float(colors[1]) * 255 / 100
-    b = float(colors[2]) * 255 / 100
-    r,g,b = round(r), round(g), round(b)
-    print(r,g,b)
-    if r <= 255 and g <= 255 and b <= 255:
-        return toRGBAPct(r,g,b,1.0)
-    else:
-        return s
+    def hsl_to_rgb(h, s, l):
+        # normalize hsl values
+        H, S, L = h/360, s/100, l/100
+        # create some temp variables
+        if L < 0.5:
+            temp1 = L*(1 + S)
+        else:
+            temp1 = L + S - L*S
+        temp2 = 2*L - temp1
+        # create temp rgb values
+        tempR = H + (1/3)
+        tempG = H
+        tempB = H - (1/3)
+        tempR, tempG, tempB = (tempR + 1) % 1, (tempG + 1) % 1, (tempB + 1) % 1
+        # tests for rgb vals
+        if tempR < (1/6):
+            R = temp2 + (temp1 - temp2)*6*tempR
+        elif tempR < (1/2):
+            R = temp1
+        elif tempR < (2/3):
+            R = temp2 + (temp1 - temp2)*6*((2/3) - tempR)
+        else:
+            R = temp2
+        if tempG < (1/6):
+            G = temp2 + (temp1 - temp2)*6*tempG
+        elif tempG < (1/2):
+            G = temp1
+        elif tempG < (2/3):
+            G = temp2 + (temp1 - temp2)*6*((2/3) - tempG)
+        else:
+            G = temp2
+        if tempB < (1/6):
+            B = temp2 + (temp1 - temp2)*6*tempB
+        elif tempB < (1/2):
+            B = temp1
+        elif tempB < (2/3):
+            B = temp2 + (temp1 - temp2)*6*((2/3) - tempB)
+        else:
+            B = temp2
+        R, G, B = round(255*R), round(255*G), round(255*B)
+        return (R, G, B)
 
-def switchRGBAPct(s):
-    colors = list(rgbaP.findall(s)[0])
-    r = float(colors[0]) * 255 / 100
-    g = float(colors[1]) * 255 / 100
-    b = float(colors[2]) * 255 / 100
-    a = float(colors[3])
-    r,g,b = round(r), round(g), round(b)
-    print("rgbap:",r,g,b,a)
-    if a < 1.0:
-        return toHSLA(r,g,b,a)
-    if r <= 255 and g <= 255 and b <= 255:
-        return toHSL(r,g,b)
-    else:
-        return s
+    def rgb_to_hsl(r, g, b):
+        # normalize rgb values
+        R, G, B = r/255, g/255, b/255
+        # luminiance
+        mini = min(R, G, B)
+        maxi = max(R, G, B)
+        L = (maxi + mini) / 2
+        # check for gray -- avoid division by zero
+        if (mini == maxi):
+            return (0, 0, L*100)
+        # saturation
+        if L < 0.5:
+            S = (maxi - mini) / (maxi + mini)
+        else:
+            S = (maxi - mini) / (2.0 - maxi - mini)
+        # hue
+        if R == maxi:
+            H = (G - B) / (maxi - mini)
+        elif G == maxi:
+            H = Hue = 2.0 + (B - R) / (maxi - mini)
+        else:  # B == maxi
+            H = 4.0 + (R - G) / (maxi - mini)
+        H = H * 60
+        H = (H + 360) % 360
+        S, L = S*100, L*100
+        return (H, S, L)
 
-def switchHSL(s):
-    colors = list(hsl.findall(s)[0])
-    h = float(colors[0])
-    s = float(colors[1])
-    l = float(colors[2])
-    r,g,b = HSLtoRGB(h,s,l)
-    r,g,b = round(r), round(g), round(b)
-    if r <= 255 and g <= 255 and b <= 255:
-        return toHSLA(r,g,b,1.0)
-    else:
-        return s
+    def hex_3(r, g, b, a):
+        if r % 17 == 0 and g % 17 == 0 and b % 17 == 0:
+            s = '#' + F.to_h(r//17) + F.to_h(g//17) + F.to_h(b//17)
+            return s if F.lower else s.upper()
+        else:
+            return F.hex_6(r, g, b, 1.0)
 
-def switchHSLA(s):
-    colors = list(hsla.findall(s)[0])
-    h = float(colors[0])
-    s = float(colors[1])
-    l = float(colors[2])
-    a = float(colors[3])
-    r,g,b = HSLtoRGB(h,s,l)
-    r,g,b = round(r), round(g), round(b)
-    if a < 1.0:
-        return toRGBAInt(r,g,b,a)
-    if r <= 255 and g <= 255 and b <= 255:
-        return to3Hex(r,g,b)
-    else:
-        return s
+    def hex_6(r, g, b, a):
+        s = '#' + F.to_h_2(r) + F.to_h_2(g) + F.to_h_2(b)
+        return s if F.lower else s.upper()
 
-def HSLtoRGB(h,s,l):
-    # normalize hsl values
-    H,S,L = h/360, s/100, l/100
-    # create some temp variables
-    if L < 0.5:
-        temp1 = L*(1+S)
-    else:
-        temp1 = L+S-(L*S)
-    temp2 = 2*L-temp1
-    # create temp rgb values
-    tempR = H + (1/3)
-    tempG = H
-    tempB = H - (1/3)
-    tempR, tempG, tempB = (tempR+1)%1, (tempG+1)%1, (tempB+1)%1
-    print("temps ", temp1, temp2)
-    print("temps ", tempR, tempG, tempB)
-    # tests for rgb vals
-    if tempR < (1/6):
-        R = temp2+((temp1-temp2)*6*tempR)
-    elif tempR < (1/2):
-        R = temp1
-    elif tempR < (2/3):
-        R = temp2+((temp1-temp2)*6*((2/3)-tempR))
-    else:
-        R = temp2
-    print("R:", R)
-    if tempG < (1/6):
-        G = temp2+(temp1-temp2)*6*tempG
-    elif tempG < (1/2):
-        G = temp1
-    elif tempG < (2/3):
-        G = temp2+(temp1-temp2)*6*((2/3)-tempG)
-    else:
-        G = temp2
-    if tempB < (1/6):
-        B = temp2+(temp1-temp2)*6*tempB
-    elif tempB < (1/2):
-        B = temp1
-    elif tempB < (2/3):
-        B = temp2+(temp1-temp2)*6*((2/3)-tempB)
-    else:
-        B = temp2
-    R,G,B = round(255*R), round(255*G), round(255*B)
-    print(R,G,B)
-    return (R,G,B)
+    def rgb(r, g, b, a):
+        return 'rgb(' + str(r) + ',' + str(g) + ',' + str(b) + ')'
 
-def RGBtoHSL(r,g,b):
-    # normalize rgb values
-    R,G,B = r/255, g/255, b/255
-    # luminiance
-    mini = min(R,G,B)
-    print("min: " + str(mini))
-    maxi = max(R,G,B)
-    print("max: " + str(maxi))
-    L = (maxi+mini)/2
-    # check for gray -- avoid division by zero
-    if (mini == maxi):
-        return (0,0,L*100)
-    # saturation
-    if L < 0.5:
-        S = (maxi-mini)/(maxi+mini)
-    else:
-        S = (maxi-mini)/(2.0-maxi-mini)
-    # hue
-    if R == maxi:
-        H = (G-B)/(maxi-mini)
-    elif G == maxi:
-        H = Hue = 2.0 + (B-R)/(maxi-mini)
-    else: # B == maxi
-        H = 4.0 + (R-G)/(maxi-mini)
-    H = H * 60
-    H = (H + 360) % 360
-    S,L = S*100, L*100
-    return (H,S,L)
+    def rgba(r, g, b, a):
+        return ('rgba(' + str(r) + ',' + str(g) + ',' + str(b) + ',' +
+                F.to_pct(a) + ')')
 
-def toH(i):
-    return list('0123456789abcdef')[i]
+    def rgb_pct(r, g, b, a):
+        return ('rgb(' + F.to_pct(r/255*100) + '%,' + F.to_pct(g/255*100) +
+                '%,' + F.to_pct(b/255*100) + '%)')
 
-def toH2(i):
-    return '{0:0{1}x}'.format(i,2)
+    def rgba_pct(r, g, b, a):
+        return ('rgba(' + F.to_pct(r/255*100) + '%,' +
+                F.to_pct(g/255*100) + '%,' + F.to_pct(b/255*100) + '%,' +
+                F.to_pct(a) + ')')
 
-def toPct(f):
-    # Max four digits after decimal point, but as few as possible
-    return '{:.4f}'.format(f).rstrip('0').rstrip('.')
+    def hsl(r, g, b, a):
+        h, s, l = F.rgb_to_hsl(r, g, b)
+        return ('hsl(' + F.to_pct(h) + ',' + F.to_pct(s) + '%,' +
+                F.to_pct(l) + '%)')
 
-def to3Hex(r,g,b):
-    if r%17 == 0 and g%17 == 0 and b%17 == 0:
-        return '#' + toH(r//17) + toH(g//17) + toH(b//17)
-    else:
-        return to6Hex(r,g,b)
+    def hsla(r, g, b, a):
+        h, s, l = F.rgb_to_hsl(r, g, b)
+        return ('hsla(' + F.to_pct(h) + ',' + F.to_pct(s) + '%,' +
+                F.to_pct(l) + '%,' + F.to_pct(a) + ')')
 
-def to6Hex(r,g,b):
-    return '#' + toH2(r) + toH2(g) + toH2(b)
+class GetRGBA:
 
-def toRGBInt(r,g,b):
-    return 'rgb('+str(r)+','+str(g)+','+str(b)+')'
+    """Extracts RGBA values from a string."""
 
-def toRGBAInt(r,g,b,a):
-    return 'rgba('+str(r)+','+str(g)+','+str(b)+','+toPct(a)+')'
+    def hex_3(s):
+        colors = hex_3['re'].findall(s)[0]
+        r = int(colors[0], 16) * 17
+        g = int(colors[1], 16) * 17
+        b = int(colors[2], 16) * 17
+        return (r, g, b, 1.0)
 
-def toRGBPct(r,g,b):
-    return 'rgb('+toPct(r/255*100)+'%,'+toPct(g/255*100)+'%,'+toPct(b/255*100)+'%)'
+    def hex_6(s):
+        colors = hex_6['re'].findall(s)[0]
+        r = int(colors[0] + colors[1], 16)
+        g = int(colors[2] + colors[3], 16)
+        b = int(colors[4] + colors[5], 16)
+        return (r, g, b, 1.0)
 
-def toRGBAPct(r,g,b,a):
-    return 'rgba('+toPct(r/255*100)+'%,'+toPct(g/255*100)+'%,'+toPct(b/255*100)+'%,'+toPct(a)+')'
+    def rgb(s):
+        r, g, b = rgb['re'].findall(s)[0]
+        return (int(r), int(g), int(b), 1.0)
 
-def toHSL(r,g,b):
-    h,s,l = RGBtoHSL(r,g,b)
-    return 'hsl('+toPct(h)+','+toPct(s)+'%,'+toPct(l)+'%)'
+    def rgba(s):
+        r, g, b, a = rgba['re'].findall(s)[0]
+        return (int(r), int(g), int(b), float(a))
 
-def toHSLA(r,g,b,a):
-    h,s,l = RGBtoHSL(r,g,b)
-    return 'hsla('+toPct(h)+','+toPct(s)+'%,'+toPct(l)+'%,'+toPct(a)+')'
+    def rgb_pct(s):
+        colors = rgb_pct['re'].findall(s)[0]
+        r = float(colors[0]) * 255 / 100
+        g = float(colors[1]) * 255 / 100
+        b = float(colors[2]) * 255 / 100
+        r, g, b = round(r), round(g), round(b)
+        return (r, g, b, 1.0)
+
+    def rgba_pct(s):
+        colors = rgba_pct['re'].findall(s)[0]
+        r = float(colors[0]) * 255 / 100
+        g = float(colors[1]) * 255 / 100
+        b = float(colors[2]) * 255 / 100
+        a = float(colors[3])
+        r, g, b = round(r), round(g), round(b)
+        return (r, g, b, a)
+
+    def hsl(s):
+        colors = hsl['re'].findall(s)[0]
+        h = float(colors[0])
+        s = float(colors[1])
+        l = float(colors[2])
+        r, g, b = F.hsl_to_rgb(h, s, l)
+        r, g, b = round(r), round(g), round(b)
+        return (r, g, b, 1.0)
+
+    def hsla(s):
+        colors = hsla['re'].findall(s)[0]
+        h = float(colors[0])
+        s = float(colors[1])
+        l = float(colors[2])
+        a = float(colors[3])
+        r, g, b = F.hsl_to_rgb(h, s, l)
+        r, g, b = round(r), round(g), round(b)
+        return (r, g, b, a)
+
+# regexes for color models
+regexes = {
+    'hex_3' : r'\B#([a-fA-F\d])([a-fA-F\d])([a-fA-F\d])\b',
+    'hex_6' : r'\B#([a-fA-F\d])([a-fA-F\d])([a-fA-F\d])([a-fA-F\d])([a-fA-F\d])([a-fA-F\d])',
+    'rgb' : r'\brgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)',
+    'rgba' : r'\brgba\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3}),\s*([\d.]+)\)',
+    'rgb_pct' : r'\brgb\(([\d.]+)%,\s*([\d.]+)%,\s*([\d.]+)%\)',
+    'rgba_pct' : r'\brgba\(([\d.]+)%,\s*([\d.]+)%,\s*([\d.]+)%,\s*([\d.]+)\)',
+    'hsl' : r'\bhsl\(([\d.]+),\s*([\d.]+)%,\s*([\d.]+)%\)',
+    'hsla' : r'\bhsla\(([\d.]+),\s*([\d.]+)%,\s*([\d.]+)%,\s*([\d.]+)\)'
+}
+
+hex_3 = {'re': re.compile(regexes['hex_3']), 'from': 'hex_3', 'to': 'hex_6'}
+hex_6 = {'re': re.compile(regexes['hex_6']), 'from': 'hex_6', 'to': 'rgb'}
+rgb = {'re': re.compile(regexes['rgb']), 'from': 'rgb', 'to': 'rgba'}
+rgba = {'re': re.compile(regexes['rgba']), 'from': 'rgba', 'to': 'rgb_pct'}
+rgb_pct = {'re': re.compile(regexes['rgb_pct']), 'from': 'rgb_pct', 'to': 'rgba_pct'}
+rgba_pct = {'re': re.compile(regexes['rgba_pct']), 'from': 'rgba_pct', 'to': 'hsl'}
+hsl = {'re': re.compile(regexes['hsl']), 'from': 'hsl', 'to': 'hsla'}
+hsla = {'re': re.compile(regexes['hsla']), 'from': 'hsla', 'to': 'hex_3'}
+
+# concatenate regexes to match multiple occurrences per line
+color_models_re = ''
+for regex in regexes.values():
+    color_models_re += regex + '|'
+color_models_re = color_models_re[:-1]  # remove final '|'
+color_models = re.compile(color_models_re)
 
 class SwitchColorModelCommand(sublime_plugin.TextCommand):
 
     def run(self, edit):
-        settings = sublime.load_settings(SETTINGS_FILE)
+        # settings
+        settings = self.view.settings().get('SwitchColorModel')
+        if settings is None:
+            settings = sublime.load_settings(SETTINGS_FILE)
+
+        # set lower/uppercase output for hex values
+        F.lower = settings.get('lowercase_hex')
+
+        # set next models as per other settings (alpha, hsl, and rgb%)
+        # if not settings.get('use_alpha'):
+        #     rgb['to'] = 'rgb_pct'
+        #     rgb_pct['to'] = 'hsl'
+        #     hsl['to'] = 'hex_3'
+        #     rgba['to'] = 'rgba_pct'
+        #     rgba_pct['to'] = 'hsla'
+        #     hsla['to'] = 'rgba'
 
         for region in self.view.sel():
             if region.empty():
-                # use the entire line containing the selection(s) or cursor(s)
+                # then use the line containing the selection(s) or cursor(s)
                 region = self.view.full_line(region)
             text = self.view.substr(region)
-            text = regexes.sub(switch, text)
+            text = color_models.sub(self.switch, text)
             self.view.replace(edit, region, text)
 
+    def switch(self, match):
+        s = match.group()
+        for model in [hex_3, hex_6, rgb, rgba, rgb_pct, rgba_pct, hsl, hsla]:
+            if model['re'].match(s):
+                r, g, b, a = getattr(GetRGBA, model['from'])(s)
+                # check values
+                if (0 <= r <= 255 and 0 <= g <= 255 and 0 <= b <= 255 and
+                        0.0 <= a <= 1.0):
+                    return getattr(F, model['to'])(r, g, b, a)
+                else:
+                    return s
+        # return original string as default
+        # TODO: necessary?
+        return s

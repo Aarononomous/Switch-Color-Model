@@ -46,7 +46,7 @@ Browse to ~/Library/Application Support/Sublime Text 3/Packages and unzip the do
 
 ## Bugs
 
-Please let me know!
+Please let me know! Email [mailto](hi@aaron-jacobson.com) or submit an issue through GitHub.
 
 ## License
 
