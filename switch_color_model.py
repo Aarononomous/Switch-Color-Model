@@ -134,6 +134,7 @@ class F:
         return ('hsla(' + F.to_pct(h) + ',' + F.to_pct(s) + '%,' +
                 F.to_pct(l) + '%,' + F.to_pct(a) + ')')
 
+
 class GetRGBA:
 
     """Extracts RGBA values from a string."""
@@ -198,22 +199,24 @@ class GetRGBA:
 
 # regexes for color models
 regexes = {
-    'hex_3' : r'\B#([a-fA-F\d])([a-fA-F\d])([a-fA-F\d])\b',
-    'hex_6' : r'\B#([a-fA-F\d])([a-fA-F\d])([a-fA-F\d])([a-fA-F\d])([a-fA-F\d])([a-fA-F\d])',
-    'rgb' : r'\brgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)',
-    'rgba' : r'\brgba\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3}),\s*([\d.]+)\)',
-    'rgb_pct' : r'\brgb\(([\d.]+)%,\s*([\d.]+)%,\s*([\d.]+)%\)',
-    'rgba_pct' : r'\brgba\(([\d.]+)%,\s*([\d.]+)%,\s*([\d.]+)%,\s*([\d.]+)\)',
-    'hsl' : r'\bhsl\(([\d.]+),\s*([\d.]+)%,\s*([\d.]+)%\)',
-    'hsla' : r'\bhsla\(([\d.]+),\s*([\d.]+)%,\s*([\d.]+)%,\s*([\d.]+)\)'
+    'hex_3': r'\B#([a-fA-F\d])([a-fA-F\d])([a-fA-F\d])\b',
+    'hex_6': r'\B#([a-fA-F\d])([a-fA-F\d])([a-fA-F\d])([a-fA-F\d])([a-fA-F\d])([a-fA-F\d])',
+    'rgb': r'\brgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)',
+    'rgba': r'\brgba\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3}),\s*([\d.]+)\)',
+    'rgb_pct': r'\brgb\(([\d.]+)%,\s*([\d.]+)%,\s*([\d.]+)%\)',
+    'rgba_pct': r'\brgba\(([\d.]+)%,\s*([\d.]+)%,\s*([\d.]+)%,\s*([\d.]+)\)',
+    'hsl': r'\bhsl\(([\d.]+),\s*([\d.]+)%,\s*([\d.]+)%\)',
+    'hsla': r'\bhsla\(([\d.]+),\s*([\d.]+)%,\s*([\d.]+)%,\s*([\d.]+)\)'
 }
 
 hex_3 = {'re': re.compile(regexes['hex_3']), 'from': 'hex_3', 'to': 'hex_6'}
 hex_6 = {'re': re.compile(regexes['hex_6']), 'from': 'hex_6', 'to': 'rgb'}
 rgb = {'re': re.compile(regexes['rgb']), 'from': 'rgb', 'to': 'rgba'}
 rgba = {'re': re.compile(regexes['rgba']), 'from': 'rgba', 'to': 'rgb_pct'}
-rgb_pct = {'re': re.compile(regexes['rgb_pct']), 'from': 'rgb_pct', 'to': 'rgba_pct'}
-rgba_pct = {'re': re.compile(regexes['rgba_pct']), 'from': 'rgba_pct', 'to': 'hsl'}
+rgb_pct = {
+    're': re.compile(regexes['rgb_pct']), 'from': 'rgb_pct', 'to': 'rgba_pct'}
+rgba_pct = {
+    're': re.compile(regexes['rgba_pct']), 'from': 'rgba_pct', 'to': 'hsl'}
 hsl = {'re': re.compile(regexes['hsl']), 'from': 'hsl', 'to': 'hsla'}
 hsla = {'re': re.compile(regexes['hsla']), 'from': 'hsla', 'to': 'hex_3'}
 
@@ -223,6 +226,7 @@ for regex in regexes.values():
     color_models_re += regex + '|'
 color_models_re = color_models_re[:-1]  # remove final '|'
 color_models = re.compile(color_models_re)
+
 
 class SwitchColorModelCommand(sublime_plugin.TextCommand):
 
@@ -236,13 +240,60 @@ class SwitchColorModelCommand(sublime_plugin.TextCommand):
         F.lower = settings.get('lowercase_hex')
 
         # set next models as per other settings (alpha, hsl, and rgb%)
-        # if not settings.get('use_alpha'):
-        #     rgb['to'] = 'rgb_pct'
-        #     rgb_pct['to'] = 'hsl'
-        #     hsl['to'] = 'hex_3'
-        #     rgba['to'] = 'rgba_pct'
-        #     rgba_pct['to'] = 'hsla'
-        #     hsla['to'] = 'rgba'
+        # using this handy chart - upper = true, lower = false, * = self
+        #        ahp    ahP    aHp    aHP    Ahp    AhP    AHp    AHP
+        #
+        # 3H     6H     6H     6H     6H     6H     6H     6H     6H
+        # 6H     RGB    RGB    RGB    RGB    RGB    RGB    RGB    RGB
+        # RGB    3H     RGB%   HSL    RGB%   RGBA   RGBA   RGBA   RGBA
+        # RGBA   *      RGBA%  HSLA   RGBA%  3H     RGB%   HSL    RGB%
+        # RGB%   *      3H     *      HSL    *      RGBA%  *      RGBA%
+        # RGBA%  *      RGBA   *      HSLA   *      3H     *      HSL
+        # HSL    *      *      3H     3H     *      *      HSLA   HSLA
+        # HSLA   *      *      RGBA   RGBA   *      *      3H     3H
+        #
+        # When alpha value < 1
+        # RGBA   *      RGBA%  HSLA   RGBA%  *      RGBA%  HSLA   RGBA%
+        # RGBA%  *      RGBA   *      HSLA   *      RGBA   *      HSLA
+        # HSLA   *      *      RGBA   RGBA   *      *      RGBA   RGBA
+
+        a = settings.get("use_alpha")
+        h = settings.get("recognize_hsl")
+        p = settings.get("recognize_rgb_percent")
+
+        if not a and not h and not p:
+            rgb['to'] = 'hex_3';        rgba['to'] = 'rgba'
+            rgb_pct['to'] = 'rgb_pct';  rgba_pct['to'] = 'rgba_pct'
+            hsl['to'] = 'hsl';          hsla['to'] = 'hsla'
+        elif not a and not h and p:
+            rgb['to'] = 'rgb_pct';      rgba['to'] = 'rgba_pct'
+            rgb_pct['to'] = 'hex_3';    rgba_pct['to'] = 'rgba'
+            hsl['to'] = 'hsl';          hsla['to'] = 'hsla'
+        elif not a and h and not p:
+            rgb['to'] = 'hsl';          rgba['to'] = 'hsla'
+            rgb_pct['to'] = 'rgb_pct';  rgba_pct['to'] = 'rgba_pct'
+            hsl['to'] = 'hex_3';        hsla['to'] = 'rgba'
+        elif not a and h and p:
+            rgb['to'] = 'rgb_pct';      rgba['to'] = 'rgba_pct'
+            rgb_pct['to'] = 'hsl';      rgba_pct['to'] = 'hsla'
+            hsl['to'] = 'hex_3';        hsla['to'] = 'rgba'
+        elif a and not h and not p:
+            rgb['to'] = 'rgba';         rgba['to'] = 'hex_3'
+            rgb_pct['to'] = 'rgb_pct';  rgba_pct['to'] = 'rgba_pct'
+            hsl['to'] = 'hsl';          hsla['to'] = 'hsla'
+        elif a and not h and p:
+            rgb['to'] = 'rgba';         rgba['to'] = 'rgb_pct'
+            rgb_pct['to'] = 'rgba_pct'; rgba_pct['to'] = 'hex_3'
+            hsl['to'] = 'hsl';          hsla['to'] = 'hsla'
+        elif a and h and not p:
+            rgb['to'] = 'rgba';         rgba['to'] = 'hsl'
+            rgb_pct['to'] = 'rgb_pct';  rgba_pct['to'] = 'rgba_pct'
+            hsl['to'] = 'hsla';         hsla['to'] = 'hex_3'
+        elif a and h and p:
+            rgb['to'] = 'rgba';         rgba['to'] = 'rgb_pct'
+            rgb_pct['to'] = 'rgba_pct'; rgba_pct['to'] = 'hsl'
+            hsl['to'] = 'hsla'
+            hsla['to'] = 'hex_3'
 
         for region in self.view.sel():
             if region.empty():
