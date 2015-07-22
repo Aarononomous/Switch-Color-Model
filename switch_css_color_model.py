@@ -4,7 +4,7 @@ import sublime
 import sublime_plugin
 import re
 
-SETTINGS_FILE = 'SwitchColorModel.sublime-settings'
+SETTINGS_FILE = 'SwitchCSSColorModel.sublime-settings'
 
 
 class F:
@@ -232,7 +232,7 @@ class SwitchColorModelCommand(sublime_plugin.TextCommand):
 
     def run(self, edit):
         # settings
-        settings = self.view.settings().get('SwitchColorModel')
+        settings = self.view.settings().get('SwitchCSSColorModel')
         if settings is None:
             settings = sublime.load_settings(SETTINGS_FILE)
 
@@ -316,4 +316,4 @@ class SwitchColorModelCommand(sublime_plugin.TextCommand):
                     return s
         # return original string as default
         # TODO: necessary?
-        return s
+        # return s

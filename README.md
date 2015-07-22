@@ -1,8 +1,6 @@
 # Switch CSS Color Model
 
-A plugin for Sublime Text. Rapidly and correctly switch between CSS color models (hex, rgb(), and hsl()).
-
-N.b.: this doesn't work with rgba() and hsla() values with an alpha level that isn't 1.
+A plugin for Sublime Text. Rapidly and correctly switch between CSS color models (hex, rgb(), rgb() with percentage values, and hsl()).
 
 ## Usage
 
@@ -10,19 +8,15 @@ N.b.: this doesn't work with rgba() and hsla() values with an alpha level that i
 
 Right-click on the selection you want to switch and choose "Switch CSS Color Model."
 
-### Via the Command Palette
-
-Within the command palette, "Switch CSS Color Model."
-
 ### With a Keyboard Shortcut
 
-You can set up a keyboard shortcut to run the command by going to **Sublime Text > Preferences > Key Bindings &ndash; User** and adding your shortcut with the `switch_color_model` command. Here are my recommendations, but you should check the User and Default key bindings to make sure that you don't overwrite another shortcut.
+You can set up a keyboard shortcut to run the command by going to **Sublime Text > Preferences > Key Bindings &ndash; User** and adding your shortcut with the `switch_color_model` command. Here's my configuration, but check your own User and Default key bindings to make sure that you're not overwriting a previously set shortcut.
 
 Mac
 
 ```
 [
-  { "keys" : ["ctrl+shift+c"], "command": "switch_color_model" }
+  { "keys" : ["ctrl+shift+c"], "command": "switch_css_color_model" }
 ]
 ```
 
@@ -30,23 +24,57 @@ Windows/Linux
 
 ```
 [
-  { "keys" : ["ctrl+alt+shift+c"], "command": "switch_color_model" }
+  { "keys" : ["ctrl+alt+shift+c"], "command": "switch_css_color_model" }
 ]
 ```
 
-### Modifying Settings
+### Via the Command Palette
 
-TODO: modification instructions
+Within the command palette, "Switch CSS Color Model."
+
+## Settings
+
+Settings are not available yet, until I figure out why I can't get user-specific settings.
+
+The default settings are
+
+```
+{
+  // Output hex values in upper- or lowercase, e.g. #4A8C27 vs. #4a8c27
+  // set to false for uppercase
+  "lowercase_hex" : false,
+  // Switch to/from alpha models to non-alpha models if alpha value is 1, e.g.
+  // rgb(0,0,0) ⟶ rgba(0,0,0,1) ⟶ hsl(0,0%,0%) ⟶ hsla(0,0%,0%,1)
+  "use_alpha" : false,
+  // Recognize HSL and HSLA models, e.g. hsla(98,76%,54%,0.32)
+  "recognize_hsl" : true,
+  // Recognize RGB percent notation, e.g. rgb(12%,34%,56%)
+  "recognize_rgb_percent" : false
+}
+
+```
+
+To change these, ….
 
 ## Installation
 
 ### Manually
 
-Browse to ~/Library/Application Support/Sublime Text 3/Packages and unzip the download inside.
+Download the latest source from [https://github.com/Aarononomous/Switch-CSS-Color-Model/archive/master.zip](GitHub), unzip it, and rename it to "Switch CSS Color Model". Then place it in your Packages directory.
 
-## Bugs
+The Packages directory is located at:
 
-Please let me know! Email [mailto](hi@aaron-jacobson.com) or submit an issue through GitHub.
+**OS X**: `~/Library/Application Support/Sublime Text 3/Packages`
+**Linux**: `~/.config/sublime-text-3/Packages/`
+**Windows**: `%APPDATA%/Sublime Text 3/Packages/`
+
+## Bugs and Issues
+
+Please let me know! Email [mailto](hi@aaron-jacobson.com) or submit an issue via [https://github.com/Aarononomous/Switch-CSS-Color-Model/issues](GitHub).
+
+## Pull Requests
+
+You can send a pull request through [https://github.com/Aarononomous/Switch-CSS-Color-Model/pulls](Github); I'll respond as quickly as possible.
 
 ## License
 
