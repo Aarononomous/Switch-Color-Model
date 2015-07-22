@@ -4,6 +4,8 @@ A plugin for Sublime Text. Rapidly and correctly switch between CSS color models
 
 ## Usage
 
+Switch CSS Color Model replaces selected text with the next in a rolling series of color models. If there's no selection(s) made, it will replace everything on the line(s) beneath the cursor(s).
+
 ### Via the Context Menu
 
 Right-click on the selection you want to switch and choose "Switch CSS Color Model."
@@ -12,7 +14,7 @@ Right-click on the selection you want to switch and choose "Switch CSS Color Mod
 
 You can set up a keyboard shortcut to run the command by going to **Sublime Text > Preferences > Key Bindings &ndash; User** and adding your shortcut with the `switch_color_model` command. Here's my configuration, but check your own User and Default key bindings to make sure that you're not overwriting a previously set shortcut.
 
-Mac
+**Mac**
 
 ```
 [
@@ -20,7 +22,7 @@ Mac
 ]
 ```
 
-Windows/Linux
+**Windows/Linux**
 
 ```
 [
@@ -38,7 +40,7 @@ Settings are not available yet, until I figure out why I can't get user-specific
 
 The default settings are
 
-```
+```JavaScript
 {
   // Output hex values in upper- or lowercase, e.g. #4A8C27 vs. #4a8c27
   // set to false for uppercase
@@ -51,7 +53,6 @@ The default settings are
   // Recognize RGB percent notation, e.g. rgb(12%,34%,56%)
   "recognize_rgb_percent" : false
 }
-
 ```
 
 To change these, ….
@@ -68,7 +69,7 @@ The Packages directory is located at:
 **Linux**: `~/.config/sublime-text-3/Packages/`
 **Windows**: `%APPDATA%/Sublime Text 3/Packages/`
 
-## Bugs and Issues
+## Bugs, Issues, and Requests
 
 Please let me know! Email [mailto](hi@aaron-jacobson.com) or submit an issue via [https://github.com/Aarononomous/Switch-CSS-Color-Model/issues](GitHub).
 

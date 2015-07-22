@@ -228,7 +228,7 @@ color_models_re = color_models_re[:-1]  # remove final '|'
 color_models = re.compile(color_models_re)
 
 
-class SwitchColorModelCommand(sublime_plugin.TextCommand):
+class SwitchCssColorModelCommand(sublime_plugin.TextCommand):
 
     def run(self, edit):
         # settings
