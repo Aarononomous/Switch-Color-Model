@@ -296,9 +296,9 @@ class SwitchCssColorModelCommand(sublime_plugin.TextCommand):
             hsla['to'] = 'hex_3'
 
         for region in self.view.sel():
-            if region.empty():
+            if region.empty() or len(self.view.lines(region)) > 1:
                 # then use the line containing the selection(s) or cursor(s)
-                region = self.view.full_line(region)
+                region = self.view.line(region)
             text = self.view.substr(region)
             text = color_models.sub(self.switch, text)
             self.view.replace(edit, region, text)

@@ -4,7 +4,7 @@ A plugin for Sublime Text. Rapidly and correctly switch between CSS color models
 
 ## Usage
 
-Switch CSS Color Model replaces selected text with the next in a rolling series of color models. If there's no selection(s) made, it will replace everything on the line(s) beneath the cursor(s).
+Switch CSS Color Model replaces selected text with the next in a rolling series of color models. By default, it will switch everything on the line containing the cursor, or if multiple lines are selected, will switch everything on those lines. However, if only one part of a line is selected, only that part will be switched.
 
 ### Via the Context Menu
 
@@ -12,13 +12,13 @@ Right-click on the selection you want to switch and choose "Switch CSS Color Mod
 
 ### With a Keyboard Shortcut
 
-You can set up a keyboard shortcut to run the command by going to **Sublime Text > Preferences > Key Bindings &ndash; User** and adding your shortcut with the `switch_color_model` command. Here's my configuration, but check your own User and Default key bindings to make sure that you're not overwriting a previously set shortcut.
+You can set up a keyboard shortcut to run the command by going to **Preferences > Key Bindings - User** and adding your shortcut with the `switch_color_model` command. Here's my configuration, but check your own User and Default key bindings to make sure that you're not overwriting a previously set shortcut.
 
 **Mac**
 
 ```
 [
-  { "keys" : ["ctrl+shift+c"], "command": "switch_css_color_model" }
+{ "keys" : ["ctrl+shift+c"], "command": "switch_css_color_model" }
 ]
 ```
 
@@ -26,7 +26,7 @@ You can set up a keyboard shortcut to run the command by going to **Sublime Text
 
 ```
 [
-  { "keys" : ["ctrl+alt+shift+c"], "command": "switch_css_color_model" }
+{ "keys" : ["ctrl+alt+shift+c"], "command": "switch_css_color_model" }
 ]
 ```
 
@@ -55,7 +55,13 @@ The default settings are
 }
 ```
 
-To change these, ….
+To change these, navigate to **Preferences > Package Settings > SwitchCSSColorModel > Settings - User** and add your preferences to the opened file, e.g.:
+
+```JavaScript
+{
+  "recognize_rgb_percent": true
+}
+```
 
 ## Installation
 
