@@ -36,8 +36,6 @@ Within the command palette, "Switch CSS Color Model."
 
 ## Settings
 
-Settings are not available yet, until I figure out why I can't get user-specific settings.
-
 The default settings are
 
 ```JavaScript
@@ -64,8 +62,6 @@ To change these, navigate to **Preferences > Package Settings > SwitchCSSColorMo
 ```
 
 ## Installation
-
-### Manually
 
 Download the latest source from [https://github.com/Aarononomous/Switch-CSS-Color-Model/archive/master.zip](GitHub), unzip it, and rename it to "Switch CSS Color Model". Then place it in your Packages directory.
 
