@@ -1,7 +1,7 @@
 {
   // Output hex values in upper- or lowercase, e.g. #4A8C27 vs. #4a8c27
   // set to false for uppercase
-  "lowercase_hex" : false,
+  "lowercase_hex" : true,
   // Switch to/from alpha models to non-alpha models if alpha value is 1, e.g.
   // rgb(0,0,0) ⟶ rgba(0,0,0,1) ⟶ hsl(0,0%,0%) ⟶ hsla(0,0%,0%,1)
   "use_alpha" : false,

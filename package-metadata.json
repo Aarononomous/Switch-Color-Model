@@ -1,0 +1,7 @@
+{
+    "dependencies": [],
+    "description": "Switch CSS color models",
+    "url": "https://github.com/Aarononomous/SwitchCSSColorModel",
+    "platforms": ["*"],
+    "sublime_text": "*"
+}
