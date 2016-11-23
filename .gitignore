@@ -18,3 +18,7 @@ todo.txt
 
 # sftp configuration file
 sftp-config.json
+
+# images
+*.mov
+*.psd

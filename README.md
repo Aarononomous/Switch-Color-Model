@@ -1,5 +1,7 @@
 # Switch CSS Color Model
 
+![Image of plugin in action](switch-color-model-animated.gif)
+
 A plugin for Sublime Text. Rapidly and correctly switch between CSS color models (hex, rgb(), rgb() with percentage values, and hsl()).
 
 ## Usage
