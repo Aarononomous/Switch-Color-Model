@@ -65,6 +65,7 @@ To change these, navigate to **Preferences > Package Settings > SwitchCSSColorMo
 
 ## Installation
 
+
 Download the latest source from [https://github.com/Aarononomous/SwitchCSSColorModel/archive/master.zip](GitHub), unzip it, and rename it to "Switch CSS Color Model". Then place it in your Packages directory.
 
 The Packages directory is located at:
@@ -75,11 +76,11 @@ The Packages directory is located at:
 
 ## Bugs, Issues, and Requests
 
-Please let me know! Email [mailto](hi@aaron-jacobson.com) or submit an issue via [https://github.com/Aarononomous/Switch-CSS-Color-Model/issues](GitHub).
+Please let me know! Email [mailto](hi@aaron-jacobson.com) or submit an issue via [https://github.com/Aarononomous/SwitchCSSColorModel/issues](GitHub).
 
 ## Pull Requests
 
-You can send a pull request through [https://github.com/Aarononomous/Switch-CSS-Color-Model/pulls](Github); I'll respond as quickly as possible.
+You can send a pull request through [https://github.com/Aarononomous/SwitchCSSColorModel/pulls](Github); I'll respond as quickly as possible.
 
 ## License
 
